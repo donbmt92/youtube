@@ -3,16 +3,11 @@
 import { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
-interface PreviewItem {
-  transcript?: string;
-  outline?: string;
-  firstSections?: string;
-  lastSections?: string;
-}
+import { BatchResultItem } from "@/services";
 
 interface PreviewModalProps {
   showPreview: boolean;
-  previewItem: PreviewItem | null;
+  previewItem: BatchResultItem | null;
   setShowPreview: (show: boolean) => void;
 }
 
@@ -26,6 +21,39 @@ export const PreviewModal = ({ showPreview, previewItem, setShowPreview }: Previ
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [setShowPreview]);
+
+  // Function to download the complete script as a text file
+  const downloadScript = () => {
+    if (!previewItem) return;
+    
+    const completeScript = `ĐỀ CƯƠNG KỊCH BẢN:
+
+${previewItem.outline || ''}
+
+
+KỊCH BẢN ĐẦY ĐỦ:
+
+${previewItem.firstSections || ''}
+
+${previewItem.lastSections || ''}`;
+    
+    // Create a blob with the text content
+    const blob = new Blob([completeScript], { type: 'text/plain;charset=utf-8' });
+    
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'kich_ban_' + new Date().toISOString().split('T')[0] + '.txt';
+    
+    // Append to the document, click it, and remove it
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(url);
+  };
 
   if (!showPreview || !previewItem) return null;
 
@@ -53,23 +81,41 @@ export const PreviewModal = ({ showPreview, previewItem, setShowPreview }: Previ
             </div>
             
             <div>
-              <h4 className="font-medium mb-2">Đề Cương</h4>
+              <h4 className="font-medium mb-2">Đề Cương Kịch Bản</h4>
               <div className="bg-gray-100 dark:bg-gray-700 rounded p-3 prose dark:prose-invert max-w-none">
                 <ReactMarkdown>{previewItem.outline || ''}</ReactMarkdown>
               </div>
             </div>
             
             <div>
-              <h4 className="font-medium mb-2">Các Phần Đầu</h4>
+              <h4 className="font-medium mb-2">Phần Đầu Kịch Bản</h4>
               <div className="bg-gray-100 dark:bg-gray-700 rounded p-3 prose dark:prose-invert max-w-none">
                 <ReactMarkdown>{previewItem.firstSections || ''}</ReactMarkdown>
               </div>
             </div>
             
             <div>
-              <h4 className="font-medium mb-2">Các Phần Cuối</h4>
+              <h4 className="font-medium mb-2">Phần Cuối Kịch Bản</h4>
               <div className="bg-gray-100 dark:bg-gray-700 rounded p-3 prose dark:prose-invert max-w-none">
                 <ReactMarkdown>{previewItem.lastSections || ''}</ReactMarkdown>
+              </div>
+            </div>
+            
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium">Kịch Bản Đầy Đủ</h4>
+                <button
+                  onClick={downloadScript}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1 px-3 rounded-md flex items-center gap-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Tải về (.txt)
+                </button>
+              </div>
+              <div className="bg-gray-100 dark:bg-gray-700 rounded p-3 prose dark:prose-invert max-w-none">
+                <ReactMarkdown>{`${previewItem.outline || ''}\n\n${previewItem.firstSections || ''}\n\n${previewItem.lastSections || ''}`}</ReactMarkdown>
               </div>
             </div>
           </div>

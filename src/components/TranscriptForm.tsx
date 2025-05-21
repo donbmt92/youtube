@@ -47,8 +47,18 @@ export const TranscriptForm = ({
             disabled={loading}
           />
           <label htmlFor="useTemplate" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-            Sử dụng mẫu kịch bản nghệ sĩ
+            Sử dụng mẫu kịch bản về diễn viên đã mất
           </label>
+        </div>
+        
+        <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
+          <p className="font-medium mb-1">Quy trình xử lý:</p>
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>Đọc transcript và tạo đề cương kịch bản</li>
+            <li>Áp dụng mẫu kịch bản về diễn viên đã mất</li>
+            <li>Tạo đề cương mới tập trung vào từng nhân vật</li>
+            <li>Tạo nội dung chi tiết theo từng phần</li>
+          </ol>
         </div>
         
         <button

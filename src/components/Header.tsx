@@ -11,9 +11,9 @@ export const Header = () => {
         height={38}
         priority
       />
-      <h1 className="text-3xl font-bold mb-2">Xử Lý Transcript YouTube</h1>
+      <h1 className="text-3xl font-bold mb-2">Tạo Kịch Bản Từ Transcript YouTube</h1>
       <p className="text-gray-600 dark:text-gray-400">
-        Được hỗ trợ bởi Google Gemini API và Next.js
+        Chuyên tạo kịch bản về diễn viên đã mất | Được hỗ trợ bời Google Gemini API
       </p>
     </div>
   );

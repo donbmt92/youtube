@@ -2,14 +2,8 @@
 
 import { RefObject } from "react";
 
-interface BatchResult {
-  transcript?: string;
-  outline?: string;
-  firstSections?: string;
-  lastSections?: string;
-  processed?: boolean;
-  error?: string;
-}
+import { BatchResultItem } from "@/services";
+
 
 interface BatchProcessingProps {
   fileInputRef: RefObject<HTMLInputElement>;
@@ -18,8 +12,8 @@ interface BatchProcessingProps {
   exportResults: () => void;
   batchProcessing: boolean;
   batchProgress: number;
-  batchResults: BatchResult[];
-  handleShowPreview: (item: BatchResult) => void;
+  batchResults: BatchResultItem[];
+  handleShowPreview: (item: BatchResultItem) => void;
 }
 
 export const BatchProcessing = ({
@@ -34,7 +28,7 @@ export const BatchProcessing = ({
 }: BatchProcessingProps) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-      <h2 className="text-xl font-semibold mb-4">Xử Lý Hàng Loạt</h2>
+      <h2 className="text-xl font-semibold mb-4">Xử Lý Kịch Bản Hàng Loạt</h2>
       <div className="space-y-4">
         <div>
           <label htmlFor="excelFile" className="block text-sm font-medium mb-2">
