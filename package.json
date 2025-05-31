@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "docx": "^9.5.0",
     "file-saver": "^2.0.5",
+    "marked": "^15.0.12",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

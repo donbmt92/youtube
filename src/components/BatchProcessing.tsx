@@ -3,6 +3,7 @@
 import { RefObject } from "react";
 
 import { BatchResultItem } from "@/services";
+import { exportBatchToDocx, formatMarkdownForCopy } from "@/services";
 
 
 interface BatchProcessingProps {
@@ -26,6 +27,22 @@ export const BatchProcessing = ({
   batchResults,
   handleShowPreview
 }: BatchProcessingProps) => {
+  // Function to copy a single result to clipboard
+  const copyResultToClipboard = (item: BatchResultItem) => {
+    const formattedContent = formatMarkdownForCopy(
+      item.outline,
+      item.firstSections,
+      item.lastSections
+    );
+    
+    navigator.clipboard.writeText(formattedContent).then(() => {
+      alert('Đã sao chép vào clipboard!');
+    }).catch(err => {
+      console.error('Lỗi khi sao chép:', err);
+      alert('Không thể sao chép vào clipboard');
+    });
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
       <h2 className="text-xl font-semibold mb-4">Xử Lý Kịch Bản Hàng Loạt</h2>
@@ -61,13 +78,22 @@ export const BatchProcessing = ({
             )}
           </button>
           
-          <button
-            onClick={exportResults}
-            disabled={batchProcessing || batchResults.length === 0 || !batchResults.some(r => r.processed)}
-            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-md transition-colors"
-          >
-            Xuất Kết Quả
-          </button>
+          <div className="flex-1 flex space-x-2">
+            <button
+              onClick={exportResults}
+              disabled={batchProcessing || batchResults.length === 0 || !batchResults.some(r => r.processed)}
+              className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-md transition-colors"
+            >
+              Xuất Excel
+            </button>
+            <button
+              onClick={() => exportBatchToDocx(batchResults)}
+              disabled={batchProcessing || batchResults.length === 0 || !batchResults.some(r => r.processed)}
+              className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-md transition-colors"
+            >
+              Xuất DOCX
+            </button>
+          </div>
         </div>
         
         {batchResults.length > 0 && (
@@ -99,12 +125,23 @@ export const BatchProcessing = ({
                       </td>
                       <td className="py-2 px-3">
                         {item.processed && (
-                          <button
-                            onClick={() => handleShowPreview(item)}
-                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            Xem kết quả
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleShowPreview(item)}
+                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              Xem kết quả
+                            </button>
+                            <button
+                              onClick={() => copyResultToClipboard(item)}
+                              className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                              title="Sao chép kết quả"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                              </svg>
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>

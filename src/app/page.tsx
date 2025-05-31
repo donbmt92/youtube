@@ -31,6 +31,7 @@ export default function Home() {
   const [batchResults, setBatchResults] = useState<BatchResultItem[]>([]);
   const [batchProcessing, setBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
+  const [actorType, setActorType] = useState("foreign");
   const fileInputRef = useRef(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewItem, setPreviewItem] = useState<BatchResultItem | null>(null);
@@ -43,30 +44,31 @@ export default function Home() {
   };
 
   // Process transcript (UI function)
-  const handleProcessTranscript = async () => {
+  const handleProcess = async () => {
     if (!transcript) {
-      alert("Vui lòng nhập transcript.");
+      alert("Vui lòng nhập transcript");
       return;
     }
 
     setLoading(true);
     setStep(1);
-    
+
     try {
-      // Use the service to process the transcript
-      const result = await processTranscript(transcript, useScriptTemplate);
-      
+      const result = actorType === "vietnamese" 
+        ? await processVietnameseActorScript(transcript)
+        : await processTranscript(transcript, useScriptTemplate);
+
       if (result.success) {
-        setOutline(result.outline || '');
-        setFirstSections(result.firstSections || '');
-        setLastSections(result.lastSections || '');
-        setStep(4);
+        setOutline(result.outline || "");
+        setFirstSections(result.firstSections || "");
+        setLastSections(result.lastSections || "");
+        setStep(2);
       } else {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error("Lỗi xử lý transcript:", error);
-      alert("Lỗi xử lý transcript. Vui lòng thử lại.");
+      console.error("Error processing transcript:", error);
+      alert("Có lỗi xảy ra khi xử lý transcript: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -137,13 +139,31 @@ export default function Home() {
       <main className="max-w-4xl mx-auto">
         <Header />
 
+        <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
+          <h1 className="text-4xl font-bold mb-8 text-center">YouTube Script Generator</h1>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Loại diễn viên
+            </label>
+            <select
+              value={actorType}
+              onChange={(e) => setActorType(e.target.value)}
+              className="w-full p-2 border rounded"
+            >
+              <option value="foreign">Diễn viên nước ngoài</option>
+              <option value="vietnamese">Diễn viên Việt Nam</option>
+            </select>
+          </div>
+        </div>
+
         <TranscriptForm 
           transcript={transcript}
           setTranscript={setTranscript}
           loading={loading}
           useScriptTemplate={useScriptTemplate}
           setUseScriptTemplate={setUseScriptTemplate}
-          handleProcessTranscript={handleProcessTranscript}
+          handleProcessTranscript={handleProcess}
         />
 
         <ResultsDisplay 

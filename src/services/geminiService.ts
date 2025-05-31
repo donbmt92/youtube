@@ -20,11 +20,13 @@ const conversationHistories: Record<string, ConversationHistory> = {};
  * Send a prompt to Gemini API with conversation history
  * @param prompt The prompt to send
  * @param conversationId Optional conversation ID to maintain context
+ * @param saveToHistory Whether to save this exchange to history (default: true)
  * @returns The API response
  */
 export const sendPromptWithHistory = async (
   prompt: string,
-  conversationId?: string
+  conversationId?: string,
+  saveToHistory: boolean = true
 ): Promise<{ response: string }> => {
   try {
     // Generate a conversation ID if not provided
@@ -48,8 +50,8 @@ export const sendPromptWithHistory = async (
         .map(msg => `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`)
         .join('\n\n')}\n\nPrompt hiện tại: ${prompt}`;
     }
-    console.log(history.messages);
-    console.log(fullPrompt);
+    // console.log(history.messages);
+    // console.log(fullPrompt);
     
     // Function to make API call with retry logic
     const makeApiCall = async (retryCount = 0): Promise<any> => {
@@ -79,16 +81,16 @@ export const sendPromptWithHistory = async (
     // Make API call with retry logic
     const data = await makeApiCall();
     
-    // Update conversation history
-    history.messages.push({ role: 'user', content: prompt });
-    
-    if (data.response) {
-      history.messages.push({ role: 'assistant', content: data.response });
+    // Update conversation history only if saveToHistory is true
+    if (saveToHistory) {
+      history.messages.push({ role: 'user', content: prompt });
+      
+      if (data.response) {
+        history.messages.push({ role: 'assistant', content: data.response });
+      }
+      
+      history.lastUpdated = new Date();
     }
-    
-    history.lastUpdated = new Date();
-    
-    // We keep all messages until script completion
     
     return data;
   } catch (error) {
