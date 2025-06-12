@@ -5,9 +5,8 @@ import { RefObject } from "react";
 import { BatchResultItem } from "@/services";
 import { exportBatchToDocx, formatMarkdownForCopy } from "@/services";
 
-
 interface BatchProcessingProps {
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   processBatch: () => void;
   exportResults: () => void;
@@ -15,6 +14,8 @@ interface BatchProcessingProps {
   batchProgress: number;
   batchResults: BatchResultItem[];
   handleShowPreview: (item: BatchResultItem) => void;
+  actorType: 'foreign' | 'vietnamese';
+  onActorTypeChange: (type: 'foreign' | 'vietnamese') => void;
 }
 
 export const BatchProcessing = ({
@@ -25,14 +26,16 @@ export const BatchProcessing = ({
   batchProcessing,
   batchProgress,
   batchResults,
-  handleShowPreview
+  handleShowPreview,
+  actorType,
+  onActorTypeChange
 }: BatchProcessingProps) => {
   // Function to copy a single result to clipboard
   const copyResultToClipboard = (item: BatchResultItem) => {
     const formattedContent = formatMarkdownForCopy(
-      item.outline,
-      item.firstSections,
-      item.lastSections
+      item.outline || '',
+      item.firstSections || '',
+      item.lastSections || ''
     );
     
     navigator.clipboard.writeText(formattedContent).then(() => {
@@ -60,6 +63,34 @@ export const BatchProcessing = ({
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             disabled={batchProcessing}
           />
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <label className="text-sm font-medium">Loại kịch bản:</label>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => onActorTypeChange('foreign')}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                actorType === 'foreign'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              disabled={batchProcessing}
+            >
+              Diễn viên nước ngoài
+            </button>
+            <button
+              onClick={() => onActorTypeChange('vietnamese')}
+              className={`px-4 py-2 rounded-md text-sm font-medium ${
+                actorType === 'vietnamese'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              disabled={batchProcessing}
+            >
+              Diễn viên Việt Nam
+            </button>
+          </div>
         </div>
         
         <div className="flex space-x-4">
@@ -113,7 +144,7 @@ export const BatchProcessing = ({
                   {batchResults.map((item, index) => (
                     <tr key={index} className="border-b dark:border-gray-700">
                       <td className="py-2 px-3">{index + 1}</td>
-                      <td className="py-2 px-3">{item.transcript?.substring(0, 50)}...</td>
+                      <td className="py-2 px-3">{item.transcript ? item.transcript.substring(0, 50) + '...' : ''}</td>
                       <td className="py-2 px-3">
                         {item.processed ? (
                           <span className="text-green-600 dark:text-green-400">Hoàn thành</span>

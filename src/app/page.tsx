@@ -32,11 +32,10 @@ export default function Home() {
   const [batchResults, setBatchResults] = useState<BatchResultItem[]>([]);
   const [batchProcessing, setBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
-  const [actorType, setActorType] = useState("foreign");
-  const fileInputRef = useRef(null);
+  const [actorType, setActorType] = useState<'foreign' | 'vietnamese'>('foreign');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewItem, setPreviewItem] = useState<BatchResultItem | null>(null);
-
 
   // Function to show preview of a processed item
   const handleShowPreview = (item: BatchResultItem) => {
@@ -63,7 +62,7 @@ export default function Home() {
         setOutline(result.outline || "");
         setFirstSections(result.firstSections || "");
         setLastSections(result.lastSections || "");
-        setStep(2);
+        setStep(4);
       } else {
         throw new Error(result.error);
       }
@@ -90,6 +89,7 @@ export default function Home() {
       const updatedResults = await processBatch(
         batchResults,
         useScriptTemplate,
+        actorType,
         (progress: number) => setBatchProgress(progress),
         (results: BatchResultItem[]) => setBatchResults([...results])
       );
@@ -149,7 +149,7 @@ export default function Home() {
             </label>
             <select
               value={actorType}
-              onChange={(e) => setActorType(e.target.value)}
+              onChange={(e) => setActorType(e.target.value as 'foreign' | 'vietnamese')}
               className="w-full p-2 border rounded"
             >
               <option value="foreign">Diễn viên nước ngoài</option>
@@ -184,6 +184,8 @@ export default function Home() {
           batchProgress={batchProgress}
           batchResults={batchResults}
           handleShowPreview={handleShowPreview}
+          actorType={actorType}
+          onActorTypeChange={setActorType}
         />
       </main>
 

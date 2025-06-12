@@ -73,17 +73,30 @@ And this outline:
 
 ${outlineData.response}
 
-Please generate a **new outline** that focuses on **10 to 12 main characters (actors)** from the original list.
+Please generate a **new outline** that focuses on **15 to 18 main characters (actors)** from the original list.
 
 For each character, I want a **dedicated section of approximately 350 words** — **please keep this length consistent for every individual character**.
 
-The total article should be around **4000-5000 words** (350 words for each character).
+The total article should be around **6000-7000 words** (350 words for each character).
+
+Please format the outline with clear numbering like this:
+1. Introduction (500 words)
+2. [Actor Name 1] (350 words)
+3. [Actor Name 2] (350 words)
+...and so on for all characters
+[N]. Conclusion (500 words)
+
+IMPORTANT REQUIREMENTS:
+- Only include actual actors from the original list - NO placeholder sections
+- Each numbered section must be a real actor with their actual name
+- Do not include any sections marked as "Add another actor" or similar placeholders
+- The total number of sections should be exactly: 1 (Introduction) + number of actual actors + 1 (Conclusion)
 
 Also, include:
-- An introduction of around **300 words**
-- A conclusion of around **300 words**
+- An introduction of around **500 words**
+- A conclusion of around **500 words**
 
-Once the entire outline (introduction + 10–12 characters + conclusion) is complete, please **stop** and **notify me** — **do not proceed to write the full content yet**.
+Once the entire outline (introduction + 10–12 actual actors + conclusion) is complete, please **stop** and **notify me** — **do not proceed to write the full content yet**.
 `;
 
     const characterOutlineData = await sendPromptWithHistory(
@@ -255,7 +268,7 @@ Tôi muốn bạn đóng vai trò là một người viết kịch bản chuyên
 - Nhắm đến việc khám phá và đưa vào những sự thật ít người biết, tin đồn hoặc giai thoại hấp dẫn
 - Đảm bảo tất cả thông tin được trình bày trong một câu chuyện liền mạch, không sử dụng dấu đầu dòng hoặc chuyển đoạn đột ngột
 
-Hãy tạo một đề cương chi tiết với 8 phần cho kịch bản này, mỗi phần khoảng 750 từ (tổng cộng khoảng 6000 từ).`;
+Hãy tạo một đề cương chi tiết với 8 phần cho kịch bản này, mỗi phần PHẢI đạt chính xác 750 từ (tổng cộng 6000 từ). Các phần phải được đánh số rõ ràng từ 1 đến 8 và mỗi phần phải có tiêu đề cụ thể.`;
 
     const outlineData = await sendPromptWithHistory(
       outlinePrompt,
@@ -263,47 +276,58 @@ Hãy tạo một đề cương chi tiết với 8 phần cho kịch bản này, 
     );
     log(1, "Completed: Outline created.", outlineData);
 
-    // Step 2: Generate first 4 parts
-    log(2, "Processing: Generating first 4 parts...");
-    const firstPartsPrompt = `Dựa vào transcript và đề cương sau:
+    // Step 2: Generate each part one by one
+    let allParts = "";
+    let previousParts = "";
+
+    for (let partNumber = 1; partNumber <= 8; partNumber++) {
+      log(2, `Processing: Generating part ${partNumber} of 8...`);
+
+      const partPrompt = `Dựa vào transcript, đề cương và các phần trước đó sau:
 
 ${outlineData.response}
 
-Hãy viết chi tiết 4 phần đầu tiên của kịch bản. Mỗi phần khoảng 750 từ. Viết bằng tiếng Việt, không sử dụng ký tự đặc biệt, không đánh số, không đánh dấu đầu dòng. Viết liền mạch như một câu chuyện.`;
+${previousParts}
 
-    const firstPartsData = await sendPromptWithHistory(
-      firstPartsPrompt,
-      conversationId
-    );
-    log(2, "Completed: First 4 parts generated.", firstPartsData);
+Hãy viết chi tiết phần ${partNumber} của kịch bản. 
 
-    // Step 3: Generate last 4 parts
-    log(3, "Processing: Generating last 4 parts...");
-    const lastPartsPrompt = `Dựa vào transcript, đề cương và 4 phần đầu tiên sau:
+⚠️ YÊU CẦU BẮT BUỘC VỀ SỐ TỪ:
+- Phần này PHẢI đạt chính xác 750 từ
+- Không được ít hơn hoặc nhiều hơn 750 từ
 
-${outlineData.response}
+Viết bằng tiếng Việt, không sử dụng ký tự đặc biệt, không đánh số, không đánh dấu đầu dòng. Viết liền mạch như một câu chuyện. Đảm bảo phần này có tiêu đề rõ ràng và nội dung phù hợp với đề cương.
 
-${firstPartsData.response}
+Sau khi viết xong, hãy đếm và xác nhận số từ của phần này.`;
 
-Hãy viết chi tiết 4 phần cuối cùng của kịch bản. Mỗi phần khoảng 750 từ. Viết bằng tiếng Việt, không sử dụng ký tự đặc biệt, không đánh số, không đánh dấu đầu dòng. Viết liền mạch như một câu chuyện.`;
+      const partData = await sendPromptWithHistory(partPrompt, conversationId);
+      log(2, `Completed: Part ${partNumber} generated.`, partData);
 
-    const lastPartsData = await sendPromptWithHistory(
-      lastPartsPrompt,
-      conversationId
-    );
-    log(3, "Completed: Last 4 parts generated.", lastPartsData);
+      // Add the new part to our collection
+      allParts += (allParts ? "\n\n" : "") + partData.response;
+      previousParts = allParts;
+
+      // Add a small delay to avoid rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+
+    // Split the content into two sections for the return value
+    const allPartsArray = allParts.split("\n\n");
+    const midPoint = Math.floor(allPartsArray.length / 2);
+
+    const firstSectionsContent = allPartsArray.slice(0, midPoint).join("\n\n");
+    const lastSectionsContent = allPartsArray.slice(midPoint).join("\n\n");
 
     return {
       success: true,
       outline: outlineData.response,
-      firstSections: firstPartsData.response,
-      lastSections: lastPartsData.response
+      firstSections: firstSectionsContent,
+      lastSections: lastSectionsContent,
     };
   } catch (error) {
     console.error("Error processing Vietnamese actor script:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 };
