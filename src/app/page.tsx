@@ -16,7 +16,8 @@ import {
   processBatch, 
   parseExcelFile, 
   exportToExcel,
-  BatchResultItem 
+  BatchResultItem,
+  processVietnameseActorScript
 } from "@/services";
 
 export default function Home() {
@@ -66,9 +67,9 @@ export default function Home() {
       } else {
         throw new Error(result.error);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error processing transcript:", error);
-      alert("Có lỗi xảy ra khi xử lý transcript: " + error.message);
+      alert("Có lỗi xảy ra khi xử lý transcript: " + (error instanceof Error ? error.message : String(error)));
     } finally {
       setLoading(false);
     }
